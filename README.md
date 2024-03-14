@@ -1,2 +1,2 @@
-# Edge_grasp_page
- Website for [Edge Grasp Network: A Graph-Based SE(3)-invariant Approach to Grasp Detection](https://haojhuang.github.io/edge_grasp_page/)
+# Fourier Transporter (FourTran)
+ Website for [FOURIER TRANSPORTER: BI-EQUIVARIANT ROBOTIC MANIPULATION IN 3D](https://haojhuang.github.io/fourtran_page/)
