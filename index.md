@@ -45,15 +45,7 @@ MathJax.Hub.Config({ tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']], processEs
 
 
 <!-- Paper video. -->
-<div class="columns is-left has-text-centered">
-      <div class="column is-four-fifths">
-        <h2 class="title is-4">Short Video Introduction</h2>
-        <div class="publication-video">
-          <iframe src="https://www.youtube.com/embed/axCpZgNuP8U"
-                  frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-        </div>
-      </div>
-</div>
+
 
 <style>
 
@@ -114,7 +106,7 @@ img.rounded {
 
 
 
-## Paper &nbsp;&nbsp; &nbsp;&nbsp; [PDF]()&nbsp;&nbsp;•&nbsp;&nbsp; [CODE]() &nbsp;&nbsp;•&nbsp;&nbsp; [Poster]() &nbsp;&nbsp;•&nbsp;&nbsp;[Video]() &nbsp;&nbsp;•&nbsp;&nbsp;**ICRA 2023**
+## Paper &nbsp;&nbsp; &nbsp;&nbsp; [PDF](https://arxiv.org/abs/2401.12046)&nbsp;&nbsp;•&nbsp;&nbsp; [CODE]() &nbsp;&nbsp;•&nbsp;&nbsp; [Poster]() &nbsp;&nbsp;•&nbsp;&nbsp;[Video]() &nbsp;&nbsp;•&nbsp;&nbsp;**ICRA 2023**
 
 <div style="width:100%; display:flex">
   
