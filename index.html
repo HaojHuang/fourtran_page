@@ -116,13 +116,14 @@
             
             <span class="author-block"><sup>$\dagger$</sup>equally advising</span>
             
+            <div> <b>ICLR 2024</b><div>
           </div>
 
           <div class="column has-text-centered">
             <div class="publication-links">
               <!-- PDF Link. -->
               <span class="link-block">
-                <a href="https://arxiv.org/abs/2401.12046"
+                <a href="https://openreview.net/forum?id=UulwvAU1W0"
                    class="external-link button is-normal is-rounded is-dark">
                   <span class="icon">
                       <i class="fas fa-file-pdf"></i>
@@ -273,8 +274,100 @@
         <div class="content has-text-justified">
           <p>
             
-            <b>Motivation: </b>Robot data is more expensive that that in computer vision and NLP.
+            <b>Sample efficiency: </b>Robot data is more expensive that that in computer vision and NLP. There are two reasons why it is expensive:
+            1). robot data often requires visual observations, goal descroptions as well as actions. It is more complex to collect robot data;
+            2). imaga data and NLP data shares commons sense. For example, people from differnt nations can understand the semantic meaning of most images
+            and can read English articles. However, the robot data collect from one setting will be hard to be used in a different setting. As a result, it is 
+            not easy to build an AGI in robotics with internet scale data. The expensive robot data lead people to consider that "could we learn a good robot policy with very few demonstration?"
+            At least for now, sample efficienct matters in robotics. This work focuses on the sample efficiency in manipulation pick and place problem and we 
+            aim to learn a good manipulation 3D pick-place policy with less than 10 robot demoonstrations.
           </p>
+
+          <p>
+            <b>Symmetry:</b> How could we achieve sample efficiency? There should be many ways to achieve it but symmetry is one of the most intersting
+            ways. What is symmetry? It appears in everyone's daily life. For example, a person can grasp his coffe mug by the hanle everyday even the position and 
+            orientation of the mug change every time. If the robot learns how to grasp the mug by the handle, could we generate the learned pick knowledge when there is 
+            a rotation or translation acting on the mug. If we can encode such property in the policy learning, it is easy to see that we can achieve better sample efficiency.
+            Data augmentation provides a way to force the neural network to learn the symmetry from the data. However, could we have a smart system that can satisfy the symmetry in nature?
+            This paper provide a general solution to levering the symmetries in manipulation pick and place problem.
+          </p>
+
+          <p><b>Action in 3D:</b> Previously, there are many works about pick and place in 2D. However, 3D policy learning is way more hard due to the
+          large action space. The action is often formatted as the (translation, orientation). In 2D case, the orientation are often limited to rotations along one axis, e.g.,
+          the axis perpendicular to the top-down image of the workspace. The number of 36 differnt rotations result in 10 degree discretization in 2D. Howver, in 3D, 10 degree 
+          discretization along each of the three axises give us $36^3=46456$ rotations. We can imagine the $R^{3}\times SO(3)$ action space is very large. The translation component
+          is easy to represent, e.g., voxel, pixel, filed. How should we model the $SO(3)$ action distribution in 3D? Since it's hard to model the 46456
+          rotations directly, one can use three 36-dimension vectors for each axis and the best action is evaluated by the multiplying the best rotation along each axis.
+          It does save the computation load, but $SO(3)$ rotations are very very intertwined. Just consider that the pick location did x, y and z independently. 
+          It could barely work if the distribution is unimodal and the signal is very strong. However, robot data is very diverse since they are many optimal solutions, e.g., the robot  
+          can grasp the mug handle with many differnt poses. Could we encode the entire $SO(3)$ distribution efficienctly? Yes, there are some basis functions defined in $SO(3)$
+          space and this work use the coefficients of $SO(3)$ basis functions, i.e., Winger-D matrix, to encode the $SO(3)$ distribution. The process of transforming a distribution over
+          3D rotations to coefficients of Winger-D matrix is called Fourier transform. It is same as transforming spatial singal to frequency domain.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <!-- Abstract. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column">
+        <h2 class="title is-3">Method Description</h2>
+        <div class="content has-text-justified">
+          <p>
+           <b>Pick and Place: </b> Many complex robotic manipulation tasks can be decomposed as a sequence of pick and place actions.
+           This paper focuses on behavior cloning for robotic pick-and-place problems.
+           The objective of $\text{FourTran}$ is to learn a policy $p(a_t|o_t)$ where the action $a_t = (a_{\text{pick}}, a_{\text{place}})$ 
+           has pick and place components and the observation $o_t$ describes the current state of the workspace. Our model factors the policy $p(a_{t},o_{t})$ as
+          </p>
+          <p style="text-align:center"> $p(a_{t}|o_{t}) = p(a_{\text{place}}|o_t,a_{\text{pick}}) p(a_{\text{pick}} | o_t)$</p>
+          <p>Please note the place action is conditioned on the pick action. We parameterize $p(a_{\text{pick}} | o_t)$ and $p(a_{\text{place}}|o_t,a_{\text{pick}})$ as two separate neural networks.</p>
+          <p>
+            <b>Pick Symmetry:</b> $\text{FourTran}$ analyzes the pick symmetry and the place symmetry following 
+            <a href="https://arxiv.org/abs/2308.07948">(Huang et al., 2023)</a>. Intuitively, a rotation $g$ on the object to be grasped should transform
+            the its optimal picking pose $(T_{\text{pick}},R_{\text{pick}})$ accordingly. The action transformation can be described as a rotation on the pick location and rotation on the pick orientation,
+            i.e., $(\rho_1(g)T_{\text{pick}}, \rho_1(g)R_{\text{pick}})$. The $\rho_1(g)$ is a tranditional 3-by-3 rotation matrix associated with $g$.
+            $\text{FourTran}$ represent $p(a_\text{pick} | o_t)$ as a steerable field $\mathbb{R}^d \to \{ SO(3) \to \mathbb{R}\}$ with <a href="https://github.com/QUVA-Lab/escnn">equivariant convolution layers</a>.
+            Considering a $128 \times 128 \times 128$ voxel grid, there is a set of coefficients of Winger-D Matrix above each voxel. A rotation or translation on $o_t$ will change
+            the steerable field accordingly.
+
+          </p> 
+            
+            <p><b>Place Symmetry:</b>
+            The place action is involved with the picked object and the placement. If there is a rotation $g_1$ acting on the pick
+            object and a rotation $g_2$ acting on the placement target, the optimal action to place the picked object is transformed from $(T_{\text{place}}, R_{\text{place}})$ to $(\rho_1(g_2)T_{\text{place}},
+            \rho_1(g_2)R_{\text{place}}\rho_1(g_1^{-1}))$. The place symmetry is sometimes referred to as bi-equivariance <a href="https://arxiv.org/abs/2206.08321">(Ryu et al., 2022)</a>. This is illustrated in figure below.
+           </p>
+           <img src="./static/images/gear.png"></img>
+           <p>Independent rotations of the gear ($g_1$) and the slot ($g_2$) result in a change ($a'=g_2 a g_1^{-1}$) in the requisite action needed to perform the insertion.
+            $\text{FourTran}$ realizes the bi-equivariance with a transporter-based architecture <a href="https://arxiv.org/abs/2010.14406">(Zeng et al., 2021)</a> shown in Figure 2.
+            Please check our paper for detailed descriptions and proofs. 
+          </p>
+           <img src="./static/images/architecture.png"></img>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <!-- Abstract. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column">
+        <h2 class="title is-3">Results</h2>
+        <div class="content has-text-justified">
+          <p>
+           We evaluate $\text{FourTran}$ on 5 tasks from RLbench and baseline it with 3 strong baselines. The task and results are shown in the following.
+           Besides 3D experiments, we also includes several interesting 2D experiments. Please check our paper for more details.
+          </p>
+          <img src="./static/images/3d_tasks.png"></img>
+          <img src="./static/images/results.png"></img>
         </div>
       </div>
     </div>
@@ -287,7 +380,7 @@
   <div class="container is-max-desktop">
     <div class="hero-body">
       <center>
-      <video id="teaser" autoplay muted loop playsinline width="75%" height="75%">
+      <video id="teaser" autoplay controls muted loop playsinline width="85%" height="85%">
         <source src="./static/videos/real_robot.mp4"
                 type="video/mp4">
       </video>
