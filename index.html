@@ -274,35 +274,33 @@
         <div class="content has-text-justified">
           <p>
             
-            <b>Sample efficiency: </b>Robot data is more expensive that that in computer vision and NLP. There are two reasons why it is expensive:
-            1). robot data often requires visual observations, goal descroptions as well as actions. It is more complex to collect robot data;
-            2). imaga data and NLP data shares commons sense. For example, people from differnt nations can understand the semantic meaning of most images
-            and can read English articles. However, the robot data collect from one setting will be hard to be used in a different setting. As a result, it is 
-            not easy to build an AGI in robotics with internet scale data. The expensive robot data lead people to consider that "could we learn a good robot policy with very few demonstration?"
-            At least for now, sample efficienct matters in robotics. This work focuses on the sample efficiency in manipulation pick and place problem and we 
-            aim to learn a good manipulation 3D pick-place policy with less than 10 robot demoonstrations.
+            <b>Sample efficiency: </b> Robot data is notably more costly to acquire compared to that in computer vision and natural language processing (NLP), primarily due to two key factors:
+
+            1). Robot data often encompasses a combination of visual observations, goal descriptions, and corresponding actions, rendering its collection inherently more resource-intensive.
+            2). Unlike image and NLP data, which often leverage shared common sense understanding across different cultures, robot data collected within a specific setting may lack transferability to other environments. This disparity complicates the development of Artificial General Intelligence (AGI) in robotics, as data collected for one scenario may not readily apply to another.
+            Given the expense associated with acquiring robot data, a pressing question arises: can we derive effective robot policies with minimal demonstration? Presently, the emphasis lies on sample efficiency in robotics. This research specifically targets sample efficiency in the manipulation of pick-and-place tasks, aspiring to formulate a robust 3D manipulation policy with fewer than 10 robot demonstrations.
           </p>
 
           <p>
-            <b>Symmetry:</b> How could we achieve sample efficiency? There should be many ways to achieve it but symmetry is one of the most intersting
-            ways. What is symmetry? It appears in everyone's daily life. For example, a person can grasp his coffe mug by the hanle everyday even the position and 
+            <b>Symmetry:</b> How could we achieve sample efficiency? There are many ways to achieve it but symmetry is one of the most intersting
+            methods. What is symmetry? It appears in everyone's daily life. For example, a person can grasp their coffe mug by the hanle even the position and 
             orientation of the mug change every time. If the robot learns how to grasp the mug by the handle, could we generate the learned pick knowledge when there is 
-            a rotation or translation acting on the mug. If we can encode such property in the policy learning, it is easy to see that we can achieve better sample efficiency.
+            a rotation or translation on the mug? If we can constrain such property inside the policy learning, it is easy to see that we can achieve better sample efficiency.
             Data augmentation provides a way to force the neural network to learn the symmetry from the data. However, could we have a smart system that can satisfy the symmetry in nature?
             This paper provide a general solution to levering the symmetries in manipulation pick and place problem.
           </p>
 
-          <p><b>Action in 3D:</b> Previously, there are many works about pick and place in 2D. However, 3D policy learning is way more hard due to the
-          large action space. The action is often formatted as the (translation, orientation). In 2D case, the orientation are often limited to rotations along one axis, e.g.,
-          the axis perpendicular to the top-down image of the workspace. The number of 36 differnt rotations result in 10 degree discretization in 2D. Howver, in 3D, 10 degree 
-          discretization along each of the three axises give us $36^3=46456$ rotations. We can imagine the $R^{3}\times SO(3)$ action space is very large. The translation component
-          is easy to represent, e.g., voxel, pixel, filed. How should we model the $SO(3)$ action distribution in 3D? Since it's hard to model the 46456
+          <p><b>Action in 3D:</b> Previously, there are many works on pick and place in 2D. However, 3D policy learning is way more hard due to the
+          large action space. The action is often formatted as the (translation, orientation). In 2D case, orientation is often limited to rotations along one axis, e.g.,
+          the axis perpendicular to the image plane. 10 degree discretization in 2D results in 36 differnt rotations. However, in 3D, 10 degree 
+          discretization along each of the three axises gives us $36^3=46456$ rotations. We can imagine the action space of $R^{3}\times SO(3)$ is very large. The translation component
+          is easy to represent, e.g., voxel, pixel, filed. However, how should we model the $SO(3)$ action distribution in 3D? Since it's hard to model the 46456
           rotations directly, one can use three 36-dimension vectors for each axis and the best action is evaluated by the multiplying the best rotation along each axis.
-          It does save the computation load, but $SO(3)$ rotations are very very intertwined. Just consider that the pick location did x, y and z independently. 
+          It does save the computation load, but $SO(3)$ rotations are very very intertwined! Just consider that we infer the pick location and consider the x, y and z independently. 
           It could barely work if the distribution is unimodal and the signal is very strong. However, robot data is very diverse since they are many optimal solutions, e.g., the robot  
           can grasp the mug handle with many differnt poses. Could we encode the entire $SO(3)$ distribution efficienctly? Yes, there are some basis functions defined in $SO(3)$
           space and this work use the coefficients of $SO(3)$ basis functions, i.e., Winger-D matrix, to encode the $SO(3)$ distribution. The process of transforming a distribution over
-          3D rotations to coefficients of Winger-D matrix is called Fourier transform. It is same as transforming spatial singal to frequency domain.
+          3D rotations to coefficients of Winger-D matrix is called Fourier transform. It is the same as transforming spatial singal to frequency domain.
           </p>
         </div>
       </div>
@@ -329,7 +327,7 @@
           <p>
             <b>Pick Symmetry:</b> $\text{FourTran}$ analyzes the pick symmetry and the place symmetry following 
             <a href="https://arxiv.org/abs/2308.07948">(Huang et al., 2023)</a>. Intuitively, a rotation $g$ on the object to be grasped should transform
-            the its optimal picking pose $(T_{\text{pick}},R_{\text{pick}})$ accordingly. The action transformation can be described as a rotation on the pick location and rotation on the pick orientation,
+            its optimal picking pose $(T_{\text{pick}},R_{\text{pick}})$ accordingly. The action transformation can be described as a rotation on the pick location and rotation on the pick orientation,
             i.e., $(\rho_1(g)T_{\text{pick}}, \rho_1(g)R_{\text{pick}})$. The $\rho_1(g)$ is a tranditional 3-by-3 rotation matrix associated with $g$.
             $\text{FourTran}$ represent $p(a_\text{pick} | o_t)$ as a steerable field $\mathbb{R}^d \to \{ SO(3) \to \mathbb{R}\}$ with <a href="https://github.com/QUVA-Lab/escnn">equivariant convolution layers</a>.
             Considering a $128 \times 128 \times 128$ voxel grid, there is a set of coefficients of Winger-D Matrix above each voxel. A rotation or translation on $o_t$ will change
